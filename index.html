@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='' xml:lang=''>
+<head>
+	<meta charset='utf-8' />
+	<meta name='viewport' content='width=device-width, user-scalable=no' />
+	<title>ProtonGame</title>
+	<style type='text/css'>
+
+		body {
+			touch-action: none;
+			margin: 0;
+			border: 0 none;
+			padding: 0;
+			text-align: center;
+			background-color: black;
+		}
+
+		#canvas {
+			display: block;
+			margin: 0;
+			color: white;
+		}
+
+		#canvas:focus {
+			outline: none;
+		}
+
+		.godot {
+			font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+			color: #e0e0e0;
+			background-color: #3b3943;
+			background-image: linear-gradient(to bottom, #403e48, #35333c);
+			border: 1px solid #45434e;
+			box-shadow: 0 0 1px 1px #2f2d35;
+		}
+
+
+		/* Status display
+		 * ============== */
+
+		#status {
+			position: absolute;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			/* don't consume click events - make children visible explicitly */
+			visibility: hidden;
+		}
+
+		#status-progress {
+			width: 366px;
+			height: 7px;
+			background-color: #38363A;
+			border: 1px solid #444246;
+			padding: 1px;
+			box-shadow: 0 0 2px 1px #1B1C22;
+			border-radius: 2px;
+			visibility: visible;
+		}
+
+		@media only screen and (orientation:portrait) {
+			#status-progress {
+				width: 61.8%;
+			}
+		}
+
+		#status-progress-inner {
+			height: 100%;
+			width: 0;
+			box-sizing: border-box;
+			transition: width 0.5s linear;
+			background-color: #202020;
+			border: 1px solid #222223;
+			box-shadow: 0 0 1px 1px #27282E;
+			border-radius: 3px;
+		}
+
+		#status-indeterminate {
+			visibility: visible;
+			position: relative;
+		}
+
+		#status-indeterminate > div {
+			width: 4.5px;
+			height: 0;
+			border-style: solid;
+			border-width: 9px 3px 0 3px;
+			border-color: #2b2b2b transparent transparent transparent;
+			transform-origin: center 21px;
+			position: absolute;
+		}
+
+		#status-indeterminate > div:nth-child(1) { transform: rotate( 22.5deg); }
+		#status-indeterminate > div:nth-child(2) { transform: rotate( 67.5deg); }
+		#status-indeterminate > div:nth-child(3) { transform: rotate(112.5deg); }
+		#status-indeterminate > div:nth-child(4) { transform: rotate(157.5deg); }
+		#status-indeterminate > div:nth-child(5) { transform: rotate(202.5deg); }
+		#status-indeterminate > div:nth-child(6) { transform: rotate(247.5deg); }
+		#status-indeterminate > div:nth-child(7) { transform: rotate(292.5deg); }
+		#status-indeterminate > div:nth-child(8) { transform: rotate(337.5deg); }
+
+		#status-notice {
+			margin: 0 100px;
+			line-height: 1.3;
+			visibility: visible;
+			padding: 4px 6px;
+			visibility: visible;
+		}
+	</style>
+<link id='-gd-engine-icon' rel='icon' type='image/png' href='index.icon.png' />
+<link rel='apple-touch-icon' href='index.apple-touch-icon.png'/>
+<script src="https://unpkg.com/@proton/web-sdk@4.1.4"></script>
+
+<script type="module">
+      let link = undefined;
+      let session = undefined;
+      let accountData = undefined;
+
+      const appIdentifier = "taskly"
+      const chainId = "384da888112027f0321850a169f737c33e53b388aad48b5adace4bab97f437e0"
+      const endpoints = ["https://proton.greymass.com"]
+      
+      const loginButton = document.querySelector('#login-button')
+      const avatar = document.querySelector('#avatar')
+      const avatarName = document.querySelector('#avatar-name')
+      const avatarImage = document.querySelector('#avatar-image')
+      const logoutIcon = document.querySelector('#logout-icon')
+      const fromInput = document.querySelector('#from-input')
+      const toInput = document.querySelector('#to-input')
+      const amountInput = document.querySelector('#amount-input')
+      const transferButton = document.querySelector('#transfer-button')
+
+      const getAvatarImage = () => {
+        const avatar = accountData && accountData.avatar
+
+        if (avatar) {
+          if (avatar.indexOf('/9j/') !== -1) {
+            return `data:image/jpeg;base64,${avatar}`
+          } else if (avatar.indexOf('iVBORw0KGgo') !== -1) {
+            return `data:image/png;base64,${avatar}`
+          }
+        }
+
+        return 'https://bloks.io/img/proton_avatar.png'
+      }
+
+      const updateStatus = () => {
+        avatarImage.src = getAvatarImage()
+
+        if (session && session.auth) {
+          avatarName.textContent = session.auth.actor.toString()
+          fromInput.value = session.auth.actor.toString()
+          loginButton.style.display = "none"
+          avatar.style.display = "block"
+        } else {
+          avatarName.textContent = ""
+          fromInput.value = ""
+          loginButton.style.display = "block"
+          avatar.style.display = "none"
+        }
+      }
+
+      const login = async (restoreSession) => {
+        const { link: localLink, session: localSession } = await ProtonWebSDK({
+          linkOptions: {
+            endpoints,
+            chainId,
+            restoreSession,
+          },
+          transportOptions: {
+            requestAccount: appIdentifier
+          },
+          selectorOptions: {
+            appName: "Taskly",
+            appLogo: "https://taskly.protonchain.com/static/media/taskly-logo.ad0bfb0f.svg",
+            customStyleOptions: {
+                modalBackgroundColor: "#F4F7FA",
+                logoBackgroundColor: "white",
+                isLogoRound: true,
+                optionBackgroundColor: "white",
+                optionFontColor: "black",
+                primaryFontColor: "black",
+                secondaryFontColor: "#6B727F",
+                linkColor: "#752EEB"
+            }
+          }
+        })
+      
+        link = localLink
+        session = localSession
+
+        updateStatus()
+      }
+
+      const logout = async () => {
+        if (link && session) {
+          await link.removeSession(appIdentifier, session.auth, chainId);
+        }
+        session = undefined;
+        link = undefined;
+
+        updateStatus()
+      }
+
+      const transfer = async ({ to, amount }) => {
+        if (!session) {
+          throw new Error('No Session');
+        }
+
+        return await session.transact({
+          actions: [{
+            // Token contract for only XPR
+            // Other tokens like XUSDC have contract "xtokens"
+            account: "eosio.token",
+
+            // Action name
+            name: "transfer",
+            
+            // Action parameters
+            data: {
+              from: session.auth.actor,
+              to: to,
+              // Change precision from 4 for other assets, e.g. 6 for USDC
+              quantity: `${(+amount).toFixed(4)} XPR`,
+              memo: ""
+            },
+            authorization: [session.auth]
+          }]
+        }, {
+          broadcast: true
+        })
+      }
+
+      // Add button listeners
+      logoutIcon.addEventListener("click", logout)
+      loginButton.addEventListener("click", () => login(false))
+      transferButton.addEventListener("click", () => transfer({
+        to: toInput.value,
+        amount: amountInput.value,
+      }))
+
+      // Restore
+      login(true)
+    </script>
+</head>
+<body>
+	<canvas id='canvas'>
+		HTML5 canvas appears to be unsupported in the current browser.<br />
+		Please try updating or use a different browser.
+	</canvas>
+	<div id='status'>
+		<div id='status-progress' style='display: none;' oncontextmenu='event.preventDefault();'><div id ='status-progress-inner'></div></div>
+		<div id='status-indeterminate' style='display: none;' oncontextmenu='event.preventDefault();'>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+		</div>
+		<div id='status-notice' class='godot' style='display: none;'></div>
+	</div>
+
+	<script type='text/javascript' src='index.js'></script>
+	<script type='text/javascript'>//<![CDATA[
+
+		const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":726496,"index.wasm":17500905},"focusCanvas":true,"gdnativeLibs":[]};
+		var engine = new Engine(GODOT_CONFIG);
+
+		(function() {
+			const INDETERMINATE_STATUS_STEP_MS = 100;
+			var statusProgress = document.getElementById('status-progress');
+			var statusProgressInner = document.getElementById('status-progress-inner');
+			var statusIndeterminate = document.getElementById('status-indeterminate');
+			var statusNotice = document.getElementById('status-notice');
+
+			var initializing = true;
+			var statusMode = 'hidden';
+
+			var animationCallbacks = [];
+			function animate(time) {
+				animationCallbacks.forEach(callback => callback(time));
+				requestAnimationFrame(animate);
+			}
+			requestAnimationFrame(animate);
+
+			function setStatusMode(mode) {
+
+				if (statusMode === mode || !initializing)
+					return;
+				[statusProgress, statusIndeterminate, statusNotice].forEach(elem => {
+					elem.style.display = 'none';
+				});
+				animationCallbacks = animationCallbacks.filter(function(value) {
+					return (value != animateStatusIndeterminate);
+				});
+				switch (mode) {
+					case 'progress':
+						statusProgress.style.display = 'block';
+						break;
+					case 'indeterminate':
+						statusIndeterminate.style.display = 'block';
+						animationCallbacks.push(animateStatusIndeterminate);
+						break;
+					case 'notice':
+						statusNotice.style.display = 'block';
+						break;
+					case 'hidden':
+						break;
+					default:
+						throw new Error('Invalid status mode');
+				}
+				statusMode = mode;
+			}
+
+			function animateStatusIndeterminate(ms) {
+				var i = Math.floor(ms / INDETERMINATE_STATUS_STEP_MS % 8);
+				if (statusIndeterminate.children[i].style.borderTopColor == '') {
+					Array.prototype.slice.call(statusIndeterminate.children).forEach(child => {
+						child.style.borderTopColor = '';
+					});
+					statusIndeterminate.children[i].style.borderTopColor = '#dfdfdf';
+				}
+			}
+
+			function setStatusNotice(text) {
+				while (statusNotice.lastChild) {
+					statusNotice.removeChild(statusNotice.lastChild);
+				}
+				var lines = text.split('\n');
+				lines.forEach((line) => {
+					statusNotice.appendChild(document.createTextNode(line));
+					statusNotice.appendChild(document.createElement('br'));
+				});
+			};
+
+			function displayFailureNotice(err) {
+				var msg = err.message || err;
+				console.error(msg);
+				setStatusNotice(msg);
+				setStatusMode('notice');
+				initializing = false;
+			};
+
+			if (!Engine.isWebGLAvailable()) {
+				displayFailureNotice('WebGL not available');
+			} else {
+				setStatusMode('indeterminate');
+				engine.startGame({
+					'onProgress': function (current, total) {
+						if (total > 0) {
+							statusProgressInner.style.width = current/total * 100 + '%';
+							setStatusMode('progress');
+							if (current === total) {
+								// wait for progress bar animation
+								setTimeout(() => {
+									setStatusMode('indeterminate');
+								}, 500);
+							}
+						} else {
+							setStatusMode('indeterminate');
+						}
+					},
+				}).then(() => {
+					setStatusMode('hidden');
+					initializing = false;
+				}, displayFailureNotice);
+			}
+		})();
+	//]]></script>
+</body>
+</html>
+

@@ -1,0 +1,160 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://ProtonSendAtomicAsset.gd" type="Script" id=1]
+[ext_resource path="res://assets/proton_animated/ProtonAnimated10.tscn" type="PackedScene" id=2]
+
+[sub_resource type="PlaneMesh" id=1]
+
+[sub_resource type="ProceduralSky" id=2]
+sky_top_color = Color( 0.741176, 0.647059, 0.945098, 1 )
+ground_bottom_color = Color( 0.458824, 0.262745, 0.890196, 1 )
+ground_horizon_color = Color( 0.458824, 0.262745, 0.890196, 1 )
+
+[sub_resource type="Environment" id=3]
+background_mode = 2
+background_sky = SubResource( 2 )
+
+[sub_resource type="CanvasItemMaterial" id=4]
+
+[sub_resource type="PlaneMesh" id=5]
+
+[sub_resource type="LargeTexture" id=6]
+resource_local_to_scene = true
+
+[node name="Node" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="Button_Login" type="Button" parent="."]
+margin_left = 350.0
+margin_top = 90.0
+margin_right = 419.0
+margin_bottom = 110.0
+
+[node name="Label_Login" type="Label" parent="Button_Login"]
+margin_left = 12.0
+margin_top = 3.0
+margin_right = 52.0
+margin_bottom = 17.0
+text = "Login"
+
+[node name="Button_Switch" type="Button" parent="."]
+margin_left = 349.0
+margin_top = 28.0
+margin_right = 533.0
+margin_bottom = 48.0
+
+[node name="Label_Switch" type="Label" parent="Button_Switch"]
+margin_left = 12.0
+margin_top = 3.0
+margin_right = 52.0
+margin_bottom = 17.0
+text = "Switch to Send XPR mode"
+
+[node name="Button_Send" type="Button" parent="."]
+margin_left = 351.0
+margin_top = 373.0
+margin_right = 420.0
+margin_bottom = 393.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+
+[node name="Label_Send" type="Label" parent="Button_Send"]
+margin_left = 12.0
+margin_top = 3.0
+margin_right = 52.0
+margin_bottom = 17.0
+text = "Send"
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+mesh = SubResource( 1 )
+material/0 = null
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.653482, 1.8295 )
+
+[node name="ProtonAnimated" parent="." instance=ExtResource( 2 )]
+transform = Transform( 0.11, 0, 0, 0, 0.11, 0, 0, 0, 0.11, 0, 0.0400981, -0.131146 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 3 )
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="."]
+material = SubResource( 4 )
+mesh = SubResource( 5 )
+texture = SubResource( 6 )
+
+[node name="TX_ID" type="RichTextLabel" parent="."]
+margin_left = 352.0
+margin_top = 424.0
+margin_right = 728.0
+margin_bottom = 484.0
+rect_pivot_offset = Vector2( 23, 8 )
+text = "TX_ID"
+
+[node name="Account" type="RichTextLabel" parent="."]
+margin_left = 352.0
+margin_top = 116.0
+margin_right = 650.0
+margin_bottom = 142.0
+rect_pivot_offset = Vector2( 23, 8 )
+text = "Account"
+
+[node name="Name" type="RichTextLabel" parent="."]
+margin_left = 352.0
+margin_top = 145.0
+margin_right = 650.0
+margin_bottom = 171.0
+rect_pivot_offset = Vector2( 23, 8 )
+text = "Name"
+
+[node name="Name2" type="RichTextLabel" parent="."]
+margin_left = 352.0
+margin_top = 175.0
+margin_right = 730.0
+margin_bottom = 201.0
+rect_pivot_offset = Vector2( 23, 8 )
+text = "Avatar"
+
+[node name="To" type="LineEdit" parent="."]
+margin_left = 410.0
+margin_top = 260.0
+margin_right = 591.0
+margin_bottom = 284.0
+text = "glbdex"
+
+[node name="Label_To" type="Label" parent="To"]
+margin_left = -58.0
+margin_top = 6.0
+margin_right = -18.0
+margin_bottom = 20.0
+text = "To"
+
+[node name="AssetID" type="LineEdit" parent="."]
+margin_left = 410.0
+margin_top = 295.0
+margin_right = 588.0
+margin_bottom = 319.0
+
+[node name="Label_AssetID" type="Label" parent="AssetID"]
+margin_left = -60.0
+margin_top = 6.0
+margin_right = -9.0
+margin_bottom = 20.0
+text = "Asset ID"
+
+[node name="Memo" type="LineEdit" parent="."]
+margin_left = 409.0
+margin_top = 328.0
+margin_right = 655.0
+margin_bottom = 352.0
+text = "Sent NFT from GoDot Engine"
+
+[node name="Label_Memo" type="Label" parent="Memo"]
+margin_left = -58.0
+margin_top = 5.0
+margin_right = -13.0
+margin_bottom = 19.0
+text = "Memo"
+
+[connection signal="pressed" from="Button_Login" to="." method="_on_Button_Login_pressed"]
+[connection signal="pressed" from="Button_Switch" to="." method="_on_Button_Scene_pressed"]
+[connection signal="pressed" from="Button_Send" to="." method="transfer"]
