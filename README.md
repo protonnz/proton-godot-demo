@@ -1,6 +1,9 @@
 # proton-godot-demo
 Example project showing how to interact with Proton chain from GoDot Engine.
 
+![image](https://user-images.githubusercontent.com/12118160/156945966-51d21eca-186c-4119-9f6d-90fad4668c64.png)
+
+
 Interact with various contracts on Proton
 
 Transfer Token (eosio.token) - See example in ProtonSendTX.gd
