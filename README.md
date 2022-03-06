@@ -32,6 +32,12 @@ To Install & Run
   4. Launch http-server 'npx http-server .'
   5. Visit local host in Chrome https://localhost:8080
 
+If you don't have nodejs installed
+
+	1. npm install nodejs
+	2. npm i -g npx
+	3. npx http-server .
+
 
 Huge thanks to Syed @jafri from Proton!
 https://protonchain.com
