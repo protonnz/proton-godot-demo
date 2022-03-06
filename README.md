@@ -3,14 +3,14 @@ Example project showing how to interact with Proton chain from GoDot Engine.
 
 Interact with various contracts on Proton
 
-Transfer Token (eosio.token)
+Transfer Token (eosio.token) - See example in ProtonSendTX.gd
 
 	action.account = "eosio.token"
 	action.name = "transfer"
 	action.data = data
 	action.authorization = authorization
 
-Transfer NFT (atomicassets)
+Transfer NFT (atomicassets) - See example in ProtonSendAtomicAsset.gd
 
 	action.account = "atomicassets"
 	action.name = "transfer"
@@ -30,5 +30,5 @@ To Install & Run
   5. Visit local host in Chrome https://localhost:8080
 
 
-Huge thanks to Syed from Proton!
+Huge thanks to Syed @jafri from Proton!
 https://protonchain.com
