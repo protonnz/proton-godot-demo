@@ -3,10 +3,10 @@ Example project showing how to interact with Proton chain from GoDot Engine.
 
 Why Proton? - No gas fees, instant transactions, xtokens, WebAuth... the list goes on
 
-Block Explorer https://protonscan.io
-WebAuth https://webauth.com
-Proton Chain https://protonchain.com
-GoDot Engine https://godotengine.org
+	Block Explorer https://protonscan.io
+	WebAuth https://webauth.com
+	Proton Chain https://protonchain.com
+	GoDot Engine https://godotengine.org
 
 ![image](https://user-images.githubusercontent.com/12118160/156945966-51d21eca-186c-4119-9f6d-90fad4668c64.png)
 
